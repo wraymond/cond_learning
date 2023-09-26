@@ -1,0 +1,25 @@
+---
+title: "Bucket_experiment"
+author: "Wendel Raymond"
+date: "`r Sys.Date()`"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+## Bucket experimet
+9 loggers were deployed in a bucket of saltwater for 18 hours. Logged temperature and conductivity every 15 minutes. YSI measured were taken at deployment and retrieval and a few point in between.
+
+```{r}
+library(tidyverse)
+```
+
+## Data
+```{r}
+## Loggers ##
+dat.21235771 <- read.csv("../data/21235771_bucket.csv", header = TRUE, stringsAsFactors = FALSE)
+
+
+## YSI ##
+dat.YSI <- read.csv("..data/YSI_bucket.csv", header = TRUE, stringsAsFactors = FALSE)
+```
+
