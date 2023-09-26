@@ -13,13 +13,127 @@ editor_options:
 library(tidyverse)
 ```
 
-## Data
+### Data
+Load
 ```{r}
 ## Loggers ##
-dat.21235771 <- read.csv("../data/21235771_bucket.csv", header = TRUE, stringsAsFactors = FALSE)
+dat.21235771 <- read.csv("../data/21235771_bucket.csv", header = FALSE, stringsAsFactors = FALSE)
+dat.21235774 <- read.csv("../data/21235774_bucket.csv", header = FALSE, stringsAsFactors = FALSE)
+dat.21742588 <- read.csv("../data/21742588_bucket.csv", header = FALSE, stringsAsFactors = FALSE)
+dat.21742589 <- read.csv("../data/21742589_bucket.csv", header = FALSE, stringsAsFactors = FALSE)
+dat.21742590 <- read.csv("../data/21742590_bucket.csv", header = FALSE, stringsAsFactors = FALSE)
+dat.21742591 <- read.csv("../data/21742591_bucket.csv", header = FALSE, stringsAsFactors = FALSE)
+dat.21742592 <- read.csv("../data/21742592_bucket.csv", header = FALSE, stringsAsFactors = FALSE)
+dat.21746438 <- read.csv("../data/21746438_bucket.csv", header = FALSE, stringsAsFactors = FALSE)
+dat.21780423 <- read.csv("../data/21780423_bucket.csv", header = FALSE, stringsAsFactors = FALSE)
 
 
 ## YSI ##
-dat.YSI <- read.csv("..data/YSI_bucket.csv", header = TRUE, stringsAsFactors = FALSE)
+dat.YSI <- read.csv("../data/YSI_bucket.csv", header = TRUE, stringsAsFactors = FALSE)
+dat.YSI <- dat.YSI %>% 
+  mutate(time = as.POSIXct(time, format = "%m/%d/%Y %H:%M:%S"))
+```
+
+Combine
+```{r}
+col_names <- c("time", "cond_usms_raw", "temp_c", "spc_cond_usms", "sal_ppt", "logger_sn")
+logger_names <- c("21235771", "21235774", "21742588", "21742589", "21742590", "21742591", "21742592", "21746438", "21780423")
+
+dat.21235771 <- dat.21235771[3:75, 2:6]
+dat.21235771$logger_sn <- logger_names[1]
+colnames(dat.21235771) <- col_names
+
+dat.21235774 <- dat.21235774[3:75, 2:6]
+dat.21235774$logger_sn <- logger_names[2]
+colnames(dat.21235774) <- col_names
+
+dat.21742588 <- dat.21742588[3:75, 2:6]
+dat.21742588$logger_sn <- logger_names[3]
+colnames(dat.21742588) <- col_names
+
+dat.21742589 <- dat.21742589[3:75, 2:6]
+dat.21742589$logger_sn <- logger_names[4]
+colnames(dat.21742589) <- col_names
+
+dat.21742590 <- dat.21742590[3:75, 2:6]
+dat.21742590$logger_sn <- logger_names[5]
+colnames(dat.21742590) <- col_names
+
+dat.21742591 <- dat.21742591[3:75, 2:6]
+dat.21742591$logger_sn <- logger_names[6]
+colnames(dat.21742591) <- col_names
+
+dat.21742592 <- dat.21742592[3:75, 2:6]
+dat.21742592$logger_sn <- logger_names[7]
+colnames(dat.21742592) <- col_names
+
+dat.21746438 <- dat.21746438[3:75, 2:6]
+dat.21746438$logger_sn <- logger_names[8]
+colnames(dat.21746438) <- col_names
+
+dat.21780423 <- dat.21780423[3:75, c(2, 3, 4, 6, 7)]
+dat.21780423$logger_sn <- logger_names[9]
+colnames(dat.21780423) <- col_names
+
+
+dat <- rbind(
+  dat.21235771,
+  dat.21235774,
+  dat.21742588,
+  dat.21742589,
+  dat.21742590,
+  dat.21742591,
+  dat.21742592,
+  dat.21746438,
+  dat.21780423
+)
+
+dat <- dat %>% 
+  mutate(time = as.POSIXct(time, format = "%m/%d/%y %I:%M:%S %p"),
+  temp_c = as.numeric(temp_c),
+  cond_usms_raw = as.numeric(cond_usms_raw),
+  spc_cond_usms = as.numeric(spc_cond_usms),
+  sal_ppt = as.numeric(sal_ppt))
+```
+
+### Explore
+```{r}
+## Spc Cond ##
+ggplot() +
+  geom_point(aes(x = time, y = spc_cond_usms, color = logger_sn), data = dat) +
+  geom_point(aes(x = time, y = spc_cond_usms), shape = 17, size = 3, data = dat.YSI) +
+  geom_hline(yintercept = 49506.6) +
+  geom_hline(yintercept = 49387.47, linetype = "dashed") +
+  geom_hline(yintercept = 49625.73, linetype = "dashed") +
+  scale_x_datetime(breaks = seq(as.POSIXct("2023-09-25 15:45:00"), as.POSIXct("2023-09-26 10:00:00"), "1 hour"), date_labels = "%H", limits = c(as.POSIXct("2023-09-25 15:45:00"), as.POSIXct("2023-09-26 10:00:00"))) +
+  xlab("Time") +
+  ylab("Specific conductivity")
+
+## Salinity ##
+ggplot() +
+  geom_point(aes(x = time, y = sal_ppt, color = logger_sn), data = dat) +
+  scale_x_datetime(breaks = seq(as.POSIXct("2023-09-25 15:45:00"), as.POSIXct("2023-09-26 10:00:00"), "1 hour"), date_labels = "%H", limits = c(as.POSIXct("2023-09-25 15:45:00"), as.POSIXct("2023-09-26 10:00:00"))) +
+  xlab("Time") +
+  ylab("Specific conductivity")
+
+ggplot() +
+  geom_point(aes(x = time, y = temp_c, color = logger_sn), data = dat) +
+  geom_point(aes(x = time, y = temp_c), shape = 17, size = 3, data = dat.YSI) +
+  scale_x_datetime(breaks = seq(as.POSIXct("2023-09-25 15:45:00"), as.POSIXct("2023-09-26 10:00:00"), "1 hour"), date_labels = "%H", limits = c(as.POSIXct("2023-09-25 15:45:00"), as.POSIXct("2023-09-26 10:00:00"))) +
+  xlab("Time") +
+  ylab("Temperature")
+```
+
+Summary stats
+```{r}
+dat.sum <- dat %>% 
+  group_by(logger_sn) %>% 
+  summarise(mean_sp_cond_usms = mean(spc_cond_usms),
+            sd_sp_cond_usms = sd(spc_cond_usms),
+            cv_sp_cond_usms = sd_sp_cond_usms/mean_sp_cond_usms) %>% 
+  mutate(perc_var_cond_logger = mean_sp_cond_usms / mean(mean_sp_cond_usms),
+         perc_var_cond_ysi = mean_sp_cond_usms / 49506.6)
+  
+
 ```
 
