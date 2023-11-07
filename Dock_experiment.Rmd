@@ -1,0 +1,134 @@
+---
+title: "Dock_experiment"
+author: "Wendel Raymond"
+date: "`r Sys.Date()`"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+## HOBO logger dock experiment
+One month deployment off the Port Angeles Harbor dock.
+
+```{r}
+library(tidyverse)
+
+theme_set(theme_classic())
+```
+
+
+### Data
+```{r}
+## Loggers ##
+dat.771.uncal <- read.csv("../data/21235771_dock_uncal.csv", header = FALSE, stringsAsFactors = FALSE)
+dat.774.uncal <- read.csv("../data/21235774_dock_uncal.csv", header = FALSE, stringsAsFactors = FALSE)
+dat.588.uncal <- read.csv("../data/21742588_dock_uncal.csv", header = FALSE, stringsAsFactors = FALSE)
+dat.589.uncal <- read.csv("../data/21742589_dock_uncal.csv", header = FALSE, stringsAsFactors = FALSE)
+dat.590.uncal <- read.csv("../data/21742590_dock_uncal.csv", header = FALSE, stringsAsFactors = FALSE)
+dat.591.uncal <- read.csv("../data/21742591_dock_uncal.csv", header = FALSE, stringsAsFactors = FALSE)
+dat.592.uncal <- read.csv("../data/21742592_dock_uncal.csv", header = FALSE, stringsAsFactors = FALSE)
+dat.438.uncal <- read.csv("../data/21746438_dock_uncal.csv", header = FALSE, stringsAsFactors = FALSE)
+dat.423.uncal <- read.csv("../data/21780423_dock_uncal.csv", header = FALSE, stringsAsFactors = FALSE)
+
+dat.771.cal <- read.csv("../data/21235771_dock_cal.csv", header = FALSE, stringsAsFactors = FALSE)
+dat.774.cal <- read.csv("../data/21235774_dock_cal.csv", header = FALSE, stringsAsFactors = FALSE)
+dat.588.cal <- read.csv("../data/21742588_dock_cal.csv", header = FALSE, stringsAsFactors = FALSE)
+dat.589.cal <- read.csv("../data/21742589_dock_cal.csv", header = FALSE, stringsAsFactors = FALSE)
+dat.590.cal <- read.csv("../data/21742590_dock_cal.csv", header = FALSE, stringsAsFactors = FALSE)
+dat.591.cal <- read.csv("../data/21742591_dock_cal.csv", header = FALSE, stringsAsFactors = FALSE)
+dat.592.cal <- read.csv("../data/21742592_dock_cal.csv", header = FALSE, stringsAsFactors = FALSE)
+dat.438.cal <- read.csv("../data/21746438_dock_cal.csv", header = FALSE, stringsAsFactors = FALSE)
+dat.423.cal <- read.csv("../data/21780423_dock_cal.csv", header = FALSE, stringsAsFactors = FALSE)
+
+## YSI ##
+ysi.dat <- read.csv("../data/dock_data.csv", header = TRUE, stringsAsFactors = FALSE)
+```
+
+#### Data management
+```{r}
+dat.uncal <- bind_rows(
+  dat.771.uncal[11:2983, 2:4] %>% mutate(sensor_sn = "771"),
+  dat.774.uncal[11:2983, 2:4] %>% mutate(sensor_sn = "774"),
+  dat.588.uncal[11:2983, 2:4] %>% mutate(sensor_sn = "588"),
+  dat.589.uncal[11:2983, 2:4] %>% mutate(sensor_sn = "589"),
+  dat.590.uncal[11:2983, 2:4] %>% mutate(sensor_sn = "590"),
+  dat.591.uncal[11:2983, 2:4] %>% mutate(sensor_sn = "591"),
+  dat.592.uncal[11:2983, 2:4] %>% mutate(sensor_sn = "592"),
+  dat.438.uncal[11:2983, 2:4] %>% mutate(sensor_sn = "438"),
+  dat.423.uncal[11:2983, 2:4] %>% mutate(sensor_sn = "423")
+  
+)
+
+colnames(dat.uncal) <- c("date", "uncal_cond", "uncal_temp", "sensor_sn")
+
+dat.cal <- bind_rows(
+  dat.771.cal[11:2983, 2:6] %>% mutate(sensor_sn = "771"),
+  dat.774.cal[11:2983, 2:6] %>% mutate(sensor_sn = "774"),
+  dat.588.cal[11:2983, 2:6] %>% mutate(sensor_sn = "588"),
+  dat.589.cal[11:2983, 2:6] %>% mutate(sensor_sn = "589"),
+  dat.590.cal[11:2983, 2:6] %>% mutate(sensor_sn = "590"),
+  dat.591.cal[11:2983, 2:6] %>% mutate(sensor_sn = "591"),
+  dat.592.cal[11:2983, 2:6] %>% mutate(sensor_sn = "592"),
+  dat.438.cal[11:2983, 2:6] %>% mutate(sensor_sn = "438"),
+  dat.423.cal[11:2983, 2:6] %>% mutate(sensor_sn = "423")
+)
+
+colnames(dat.cal) <- c("date", "cal_cond", "cal_temp", "cal_spcond", "cal_sal", "sensor_sn")
+
+dat <- full_join(dat.uncal, dat.cal)
+
+dat$date <- as.POSIXct(dat$date, format = "%m/%d/%y %I:%M:%S %p")
+
+dat <- dat %>% 
+  mutate(uncal_cond = as.numeric(uncal_cond),
+         uncal_temp = as.numeric(uncal_temp),
+         cal_cond = as.numeric(cal_cond),
+         cal_temp = as.numeric(cal_temp),
+         cal_spcond = as.numeric(cal_spcond),
+         cal_sal = as.numeric(cal_sal))
+
+
+ysi.dat$date <- as.POSIXct(ysi.dat$date, format = "%m/%d/%Y %H:%M")  
+```
+
+### Plots
+
+```{r}
+pal <- c("#0072B2", "#D55E00", "#009E73", "#CC79A7", "#923C8E", "#8C613C", "#E12F61", "#55B4E9", "#666666")
+
+## Conductivity ##
+ggplot() +
+  geom_point(data = dat, aes(x = date, y = uncal_cond, color = sensor_sn)) +
+  scale_color_manual(values = pal) +
+  scale_x_datetime(breaks = seq(as.POSIXct("2023-10-06 14:30:00"), as.POSIXct("2023-11-06 13:00:00"), "1 day"), date_labels = "%d", limits = c(as.POSIXct("2023-10-06 14:30:00"), as.POSIXct("2023-11-06 13:00:00"))) +
+  scale_y_continuous(limits = c(10000, 40000)) +
+  geom_point(data = ysi.dat, aes(x = date, y = cond_usm), size = 3)
+
+## Spec Cond ##
+ggplot() +
+  geom_point(data = dat, aes(x = date, y = cal_spcond, color = sensor_sn)) +
+  scale_color_manual(values = pal) +
+  scale_x_datetime(breaks = seq(as.POSIXct("2023-10-06 14:30:00"), as.POSIXct("2023-11-06 13:00:00"), "1 day"), date_labels = "%d", limits = c(as.POSIXct("2023-10-06 14:30:00"), as.POSIXct("2023-11-06 13:00:00"))) +
+  scale_y_continuous(limits = c(40000, 60000)) +
+  geom_point(data = ysi.dat, aes(x = date, y = spc_cond_usm), size = 3)
+
+## Salinity ##
+ggplot() +
+  geom_point(data = dat, aes(x = date, y = cal_sal, color = sensor_sn)) +
+  scale_color_manual(values = pal) +
+  scale_x_datetime(breaks = seq(as.POSIXct("2023-10-06 14:30:00"), as.POSIXct("2023-11-06 13:00:00"), "1 day"), date_labels = "%d", limits = c(as.POSIXct("2023-10-06 14:30:00"), as.POSIXct("2023-11-06 13:00:00"))) +
+  scale_y_continuous(limits = c(28, 40)) +
+  geom_point(data = ysi.dat, aes(x = date, y = sal_ppt), size = 3)
+
+## Temperature ##
+ggplot() +
+  geom_point(data = dat, aes(x = date, y = uncal_temp, color = sensor_sn)) +
+  scale_color_manual(values = pal) +
+  scale_x_datetime(breaks = seq(as.POSIXct("2023-10-06 14:30:00"), as.POSIXct("2023-11-06 13:00:00"), "1 day"), date_labels = "%d", limits = c(as.POSIXct("2023-10-06 14:30:00"), as.POSIXct("2023-11-06 13:00:00"))) +
+  scale_y_continuous(limits = c(9, 14)) +
+  geom_point(data = ysi.dat, aes(x = date, y = temp_c), size = 3)
+```
+
+
+```{r}
+```
+
