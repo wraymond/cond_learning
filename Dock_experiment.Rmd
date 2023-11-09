@@ -101,7 +101,8 @@ ggplot() +
   scale_color_manual(values = pal) +
   scale_x_datetime(breaks = seq(as.POSIXct("2023-10-06 14:30:00"), as.POSIXct("2023-11-06 13:00:00"), "1 day"), date_labels = "%d", limits = c(as.POSIXct("2023-10-06 14:30:00"), as.POSIXct("2023-11-06 13:00:00"))) +
   scale_y_continuous(limits = c(10000, 40000)) +
-  geom_point(data = ysi.dat, aes(x = date, y = cond_usm), size = 3)
+  geom_point(data = ysi.dat, aes(x = date, y = cond_usm), size = 3) +
+  theme(text = element_text(size = 20))
 
 ## Spec Cond ##
 ggplot() +
@@ -109,7 +110,8 @@ ggplot() +
   scale_color_manual(values = pal) +
   scale_x_datetime(breaks = seq(as.POSIXct("2023-10-06 14:30:00"), as.POSIXct("2023-11-06 13:00:00"), "1 day"), date_labels = "%d", limits = c(as.POSIXct("2023-10-06 14:30:00"), as.POSIXct("2023-11-06 13:00:00"))) +
   scale_y_continuous(limits = c(40000, 60000)) +
-  geom_point(data = ysi.dat, aes(x = date, y = spc_cond_usm), size = 3)
+  geom_point(data = ysi.dat, aes(x = date, y = spc_cond_usm), size = 3) +
+  theme(text = element_text(size = 20))
 
 ## Salinity ##
 ggplot() +
@@ -117,7 +119,8 @@ ggplot() +
   scale_color_manual(values = pal) +
   scale_x_datetime(breaks = seq(as.POSIXct("2023-10-06 14:30:00"), as.POSIXct("2023-11-06 13:00:00"), "1 day"), date_labels = "%d", limits = c(as.POSIXct("2023-10-06 14:30:00"), as.POSIXct("2023-11-06 13:00:00"))) +
   scale_y_continuous(limits = c(28, 40)) +
-  geom_point(data = ysi.dat, aes(x = date, y = sal_ppt), size = 3)
+  geom_point(data = ysi.dat, aes(x = date, y = sal_ppt), size = 3) +
+  theme(text = element_text(size = 20))
 
 ## Temperature ##
 ggplot() +
@@ -125,10 +128,7 @@ ggplot() +
   scale_color_manual(values = pal) +
   scale_x_datetime(breaks = seq(as.POSIXct("2023-10-06 14:30:00"), as.POSIXct("2023-11-06 13:00:00"), "1 day"), date_labels = "%d", limits = c(as.POSIXct("2023-10-06 14:30:00"), as.POSIXct("2023-11-06 13:00:00"))) +
   scale_y_continuous(limits = c(9, 14)) +
-  geom_point(data = ysi.dat, aes(x = date, y = temp_c), size = 3)
-```
-
-
-```{r}
+  geom_point(data = ysi.dat, aes(x = date, y = temp_c), size = 3) +
+  theme(text = element_text(size = 20))
 ```
 
